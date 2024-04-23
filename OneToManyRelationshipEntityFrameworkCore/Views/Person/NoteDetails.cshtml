@@ -1,0 +1,36 @@
+﻿@model OneToManyRelationshipEntityFrameworkCore.Models.Note
+
+@{
+    ViewData["Title"] = "NoteDetails";
+}
+
+<h1>NoteDetails</h1>
+
+<div>
+    <h4>Note</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.NoteName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.NoteName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.NoteValue)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.NoteValue)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PersonId)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PersonId)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="EditNote" asp-route-Id="@Model?.PersonId" asp-route-NoteId="@Model?.NoteId">EditNote</a> |
+    <a asp-action="Details" asp-route-id="@Model?.PersonId">Back to List</a>
+</div>

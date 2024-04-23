@@ -1,0 +1,77 @@
+﻿@model OneToManyRelationshipEntityFrameworkCore.Models.Person
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Person</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.PersonId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+
+
+
+
+
+<p>
+    <a asp-action="Add" asp-route-id="@Model?.PersonId">Add Note</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ResearvedNotes[0].NoteName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ResearvedNotes[0].NoteValue)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @{
+            bool isEmpty = !Model.ResearvedNotes.Any();
+        }
+
+
+        @if (!isEmpty)
+        {
+            @foreach (var item in Model.ResearvedNotes)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.NoteName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.NoteValue)
+                    </td>
+                    <td>
+                        <a asp-action="EditNote" asp-route-Id="@item.PersonId" asp-route-NoteId="@item.NoteId">EditNote</a> |
+                        <a asp-action="NoteDetails" asp-route-Id="@item.PersonId" asp-route-NoteId="@item.NoteId">Details</a> |
+                        <a asp-action="DeleteNote" asp-route-Id="@item.PersonId" asp-route-NoteId="@item.NoteId">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="3"><p class="text-center">No data is inserted yet</p></td></tr>
+        }
+
+    </tbody>
+</table>
