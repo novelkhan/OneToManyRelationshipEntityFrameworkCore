@@ -40,6 +40,24 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
             return View(person);
         }
 
+
+        public async Task<IActionResult> Detail(int? PersonId)
+        {
+            if (PersonId == null || _context.Persons == null)
+            {
+                return NotFound();
+            }
+
+            //var person = await _context.Person.FirstOrDefaultAsync(m => m.Id == id);            
+            var person = await _context.Persons.Include(p => p.ResearvedNotes).AsNoTracking().FirstOrDefaultAsync(m => m.PersonId == PersonId);
+            if (person == null)
+            {
+                return NotFound();
+            }
+
+            return View(person);
+        }
+
         // GET: Person/Create
         public IActionResult Create()
         {
@@ -190,11 +208,12 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Add(int Id, [Bind("NoteId,NoteName,NoteValue,Id")] Note note)
+        public async Task<IActionResult> Add(int Id, [Bind("NoteId,NoteName,NoteValue,PersonId")] Note note)
         {
+            int PersonId = Id;
             if (ModelState.IsValid)
             {
-                var person = await _context.Persons.FindAsync(Id);
+                var person = await _context.Persons.FindAsync(PersonId);
                 //person.notes.Add(note);
                 if (person != null)
                 {
@@ -207,34 +226,35 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
                     {
                         person.ResearvedNotes.Add(note);
                     }
-                }
 
-                if (person.ResearvedNotes != null)
-                {
-                    //_context.Entry(person).State = EntityState.Added; // added row
 
-                    try
+                    if (person.ResearvedNotes != null)
                     {
-                        _context.Entry(person).State = EntityState.Modified;
-                        _context.Persons.Update(person);
-                        await _context.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        if (!PersonExists(person.PersonId))
+                        //_context.Entry(person).State = EntityState.Added; // added row
+
+                        try
                         {
-                            return NotFound();
+                            _context.Entry(person).State = EntityState.Modified;
+                            _context.Persons.Update(person);
+                            await _context.SaveChangesAsync();
                         }
-                        else
+                        catch (DbUpdateConcurrencyException)
                         {
-                            throw;
+                            if (!PersonExists(person.PersonId))
+                            {
+                                return NotFound();
+                            }
+                            else
+                            {
+                                throw;
+                            }
                         }
                     }
+
+
+                    //return RedirectToAction(nameof(Index));
+                    return RedirectToAction("Details", "Person", new { PersonId });
                 }
-
-
-                //return RedirectToAction(nameof(Index));
-                return RedirectToAction("Details", "Person", new { Id });
             }
             return View(note);
         }
