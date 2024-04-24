@@ -11,6 +11,6 @@ using OneToManyRelationshipEntityFrameworkCore.Models;
         {
         }
 
-        public DbSet<Person>? Persons { get; set; }
-        public DbSet<Note>? Notes { get; set; }
+        public DbSet<Person> Persons { get; set; }
+        public DbSet<Note> Notes { get; set; }
     }

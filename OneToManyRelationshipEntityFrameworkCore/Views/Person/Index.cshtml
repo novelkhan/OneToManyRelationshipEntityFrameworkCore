@@ -15,20 +15,22 @@
             <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
+            <th>Owned Note(s)</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var person in Model)
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Name)
+                    @Html.DisplayFor(modelItem => person.Name)
                 </td>
+                <td>@await Component.InvokeAsync("Notes", new { id = person.PersonId })</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.PersonId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.PersonId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.PersonId">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@person.PersonId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@person.PersonId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@person.PersonId">Delete</a>
                 </td>
             </tr>
         }

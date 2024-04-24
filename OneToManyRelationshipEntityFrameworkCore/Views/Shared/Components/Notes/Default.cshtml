@@ -1,0 +1,17 @@
+﻿@* This is the new code *@
+@model OneToManyRelationshipEntityFrameworkCore.Models.Person
+
+<a asp-controller="Person" asp-action="Details" asp-route-id="@Model?.PersonId" style="text-decoration:none; color:palevioletred;">
+    <i style="color:palevioletred;">@ViewBag.AvailableNotes</i>
+</a>
+
+
+
+
+
+
+
+
+
+@* This is the privious code *@
+@* <i style="color:palevioletred;">@ViewBag.AvailableNotes</i> *@

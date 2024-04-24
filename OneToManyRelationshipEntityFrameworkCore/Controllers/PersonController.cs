@@ -41,23 +41,6 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
         }
 
 
-        public async Task<IActionResult> Detail(int? PersonId)
-        {
-            if (PersonId == null || _context.Persons == null)
-            {
-                return NotFound();
-            }
-
-            //var person = await _context.Person.FirstOrDefaultAsync(m => m.Id == id);            
-            var person = await _context.Persons.Include(p => p.ResearvedNotes).AsNoTracking().FirstOrDefaultAsync(m => m.PersonId == PersonId);
-            if (person == null)
-            {
-                return NotFound();
-            }
-
-            return View(person);
-        }
-
         // GET: Person/Create
         public IActionResult Create()
         {
@@ -112,7 +95,7 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
             {
                 try
                 {
-                    _context.Update(person);
+                    _context.Persons.Update(person);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -152,14 +135,14 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
         // POST: Person/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int Id)
         {
             if (_context.Persons == null)
             {
                 return Problem("Entity set 'ApplicationDbContext.Person'  is null.");
             }
 
-            var person = await _context.Persons.Include(r => r.ResearvedNotes).AsNoTracking().FirstOrDefaultAsync(p => p.PersonId == id);
+            var person = await _context.Persons.Include(r => r.ResearvedNotes).AsNoTracking().FirstOrDefaultAsync(p => p.PersonId == Id);
 
             if (person != null)
             {
@@ -208,15 +191,16 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Add(int Id, [Bind("NoteId,NoteName,NoteValue,PersonId")] Note note)
+        public async Task<IActionResult> Add(int Id, [Bind("NoteName,NoteValue")] Note note)
         {
-            int PersonId = Id;
             if (ModelState.IsValid)
             {
-                var person = await _context.Persons.FindAsync(PersonId);
+                //var person = await _context.Persons.Include(r => r.ResearvedNotes).AsNoTracking().FirstOrDefaultAsync(p => p.PersonId == Id);
+                var person = await _context.Persons.FindAsync(Id);
                 //person.notes.Add(note);
                 if (person != null)
                 {
+                    //note.PersonId = person.PersonId;
                     if (person.ResearvedNotes == null)
                     {
                         person.ResearvedNotes = new List<Note>();
@@ -253,7 +237,7 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
 
 
                     //return RedirectToAction(nameof(Index));
-                    return RedirectToAction("Details", "Person", new { PersonId });
+                    return RedirectToAction("Details", "Person", new { Id });
                 }
             }
             return View(note);
@@ -273,14 +257,14 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
 
 
 
-        public async Task<IActionResult> DeleteNote(int PersonId, int NoteId)
+        public async Task<IActionResult> DeleteNote(int Id, int NoteId)
         {
             if (NoteId == null || _context.Notes == null)
             {
                 return NotFound();
             }
 
-            var note = await _context.Notes.Where(i => i.PersonId == PersonId).FirstOrDefaultAsync(m => m.NoteId == NoteId);
+            var note = await _context.Notes.Where(i => i.PersonId == Id).FirstOrDefaultAsync(m => m.NoteId == NoteId);
 
             if (note == null)
             {
@@ -293,30 +277,22 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
         // POST: Note/Delete/5
         [HttpPost, ActionName("DeleteNote")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteNoteConfirmed(int PersonId, int NoteId)
+        public async Task<IActionResult> DeleteNoteConfirmed(int Id, int NoteId)
         {
             if (_context.Notes == null)
             {
                 return Problem("Entity set 'ApplicationDbContext.Notes'  is null.");
             }
 
-            var noteToBeRemoved = await _context.Notes.Where(i => i.PersonId == PersonId).FirstOrDefaultAsync(m => m.NoteId == NoteId);
+            var noteToBeRemoved = await _context.Notes.Where(i => i.PersonId == Id).FirstOrDefaultAsync(m => m.NoteId == NoteId);
             if (noteToBeRemoved != null)
             {
                 _context.Notes.Remove(noteToBeRemoved);
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction("Details", "Person", new { PersonId });
+            return RedirectToAction("Details", "Person", new { Id });
         }
-
-
-
-
-
-
-
-
 
 
 
@@ -324,7 +300,7 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
 
 
         // GET: Note/Edit/5
-        public async Task<IActionResult> EditNote(int PersonId, int NoteId)
+        public async Task<IActionResult> EditNote(int Id, int NoteId)
         {
             if (NoteId == null || _context.Notes == null)
             {
@@ -332,12 +308,12 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
             }
 
             //var note = await _context.Note.FindAsync(NoteId);
-            var noteToBeEdited = await _context.Notes.Where(i => i.PersonId == PersonId).FirstOrDefaultAsync(m => m.NoteId == NoteId);
-            if (noteToBeEdited == null)
+            var note = await _context.Notes.Where(p => p.PersonId == Id).FirstOrDefaultAsync(m => m.NoteId == NoteId);
+            if (note == null)
             {
                 return NotFound();
             }
-            return View(noteToBeEdited);
+            return View(note);
         }
 
         // POST: Note/Edit/5
@@ -345,7 +321,7 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditNote(int PersonId, int NoteId, [Bind("NoteId,NoteName,NoteValue,PersonId")] Note note)
+        public async Task<IActionResult> EditNote(int Id, int NoteId, [Bind("NoteId,NoteName,NoteValue,PersonId")] Note note)
         {
             if (NoteId != note.NoteId)
             {
@@ -356,7 +332,7 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
             {
                 try
                 {
-                    _context.Update(note);
+                    _context.Notes.Update(note);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -371,7 +347,7 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
                     }
                 }
                 //return RedirectToAction(nameof(Index));
-                return RedirectToAction("Details", "Person", new { PersonId });
+                return RedirectToAction("Details", "Person", new { Id });
             }
             return View(note);
         }
@@ -389,7 +365,7 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
 
 
         // GET: Note/Details/5
-        public async Task<IActionResult> NoteDetails(int PersonId, int NoteId)
+        public async Task<IActionResult> NoteDetails(int Id, int NoteId)
         {
             if (NoteId == null || _context.Notes == null)
             {
@@ -397,7 +373,7 @@ namespace OneToManyRelationshipEntityFrameworkCore.Controllers
             }
 
             //var note = await _context.Note.FirstOrDefaultAsync(m => m.Id == id);
-            var note = await _context.Notes.Where(p => p.PersonId == PersonId).FirstOrDefaultAsync(m => m.NoteId == NoteId);
+            var note = await _context.Notes.Where(p => p.PersonId == Id).FirstOrDefaultAsync(m => m.NoteId == NoteId);
             if (note == null)
             {
                 return NotFound();

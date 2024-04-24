@@ -1,0 +1,5 @@
+﻿@model OneToManyRelationshipEntityFrameworkCore.Models.Person
+
+<a asp-controller="Person" asp-action="Details" asp-route-id="@Model?.PersonId" style="text-decoration:none; color:palevioletred;">
+    <p>@Html.DisplayFor(model => model.Name)</p>
+</a>
